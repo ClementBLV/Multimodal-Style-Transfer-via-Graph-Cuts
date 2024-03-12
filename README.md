@@ -1,4 +1,4 @@
-# Multimodal Style Transfer via Graph Cuts
+# Computationnal Imaging course : Multimodal Style Transfer via Graph Cuts
 Pytorch(1.0+) implementation(unofficial) of ICCV 2019 paper ["Multimodal Style Transfer via Graph Cuts"](https://arxiv.org/abs/1904.04443).
 
 Original tensorflow implementations from the author can be found [here](https://github.com/yulunzhang/MST).
