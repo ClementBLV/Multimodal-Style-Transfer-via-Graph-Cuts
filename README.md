@@ -16,6 +16,17 @@ This repository provides a pre-trained model for you to generate your own image 
 Optional but recommended for training
 - GPU environment 
 
+## Installation : 
+
+In order to install the necessary libraries run the following lines in your terminal : 
+
+```[bash]
+conda create -n MST python=3.9
+conda activate MST
+pip install -r requirements.txt
+```
+
+
 ## I have provided a jupyter notebook with instructions to run the training and testing python files using the Google Colab's free GPU. 
 If you wish to run them on your local machine you can follow the instructions below.
 Note: Testing does not require GPU.
