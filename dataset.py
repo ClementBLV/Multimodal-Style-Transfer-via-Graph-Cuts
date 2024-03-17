@@ -1,6 +1,6 @@
 import os
 import glob
-import numpy as np 
+import numpy as np
 import argparse
 from tqdm import tqdm
 import torch
@@ -70,14 +70,16 @@ class PreProcessDataset(Dataset):
 
 if __name__ == '__main__':
 	cli = argparse.ArgumentParser(description='PreProcess Dataset to get transformed images')
-	cli.add_argument('--train_content_dir', type=str, default='/data/content',
+	cli.add_argument('--train_content_dir', type=str, default=None,
 					help='content images dir to train on')
-	cli.add_argument('--train_style_dir', type=str, default='/data/style',
+	cli.add_argument('--train_style_dir', type=str, default=None,
 					help='style images dir to train on')
-	cli.add_argument('--test_content_dir', type=str, default='/data/content',
+	cli.add_argument('--test_content_dir', type=str, default=None,
 					help='content images to test on')
-	cli.add_argument('--test_style_dir', type=str, default='/data/style',
+	cli.add_argument('--test_style_dir', type=str, default=None,
 					help='style images to test on')
 	args = cli.parse_args()
-	PreProcessDataset(args.train_content_dir, args.train_style_dir)
-	PreProcessDataset(args.test_content_dir, args.test_style_dir)
+	if args.train_content_dir is not None :
+		PreProcessDataset(args.train_content_dir, args.train_style_dir)
+	if args.test_content_dir is not None :
+		PreProcessDataset(args.test_content_dir, args.test_style_dir)
