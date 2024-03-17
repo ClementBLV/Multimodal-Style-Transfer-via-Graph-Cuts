@@ -1,0 +1,11 @@
+PyMaxflow
+pillow
+torchVision
+torch
+glob2
+numpy 
+argparse
+tqdm
+scikit-image
+scikit-learn
+requests
