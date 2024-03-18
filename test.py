@@ -31,7 +31,13 @@ def main():
                         help='pretrained model state')
 
     args = parser.parse_args()
+    #########
+    content_dir_resized = args.content + '_resized'
+    style_dir_resized = args.style + '_resized'
+    assert (os.path.exists(content_dir_resized)) , 'The content must be resized before to avoid issues'
+    assert (os.path.exists(style_dir_resized)), 'The style must be resized before to avoid issues'
 
+    #########
     # set device on GPU if available, else CPU
     if torch.cuda.is_available() and args.gpu >= 0:
         device = torch.device(f'cuda:{args.gpu}')
@@ -50,8 +56,8 @@ def main():
         print(f'{args.model_state_path} loaded')
     model = model.to(device)
 
-    c = Image.open(args.content)
-    s = Image.open(args.style)
+    c = Image.open(content_dir_resized)
+    s = Image.open(style_dir_resized)
     c_tensor = trans(c).unsqueeze(0).to(device)
     s_tensor = trans(s).unsqueeze(0).to(device)
 
@@ -59,8 +65,8 @@ def main():
         out = model.generate(c_tensor, s_tensor).to('cpu')
 
     if args.output_name is None:
-        c_name = os.path.splitext(os.path.basename(args.content))[0]
-        s_name = os.path.splitext(os.path.basename(args.style))[0]
+        c_name = os.path.splitext(os.path.basename(content_dir_resized))[0]
+        s_name = os.path.splitext(os.path.basename(style_dir_resized))[0]
         args.output_name = f'{c_name}_{s_name}'
 
     save_image(out, f'{args.output_name}.jpg', nrow=1)
