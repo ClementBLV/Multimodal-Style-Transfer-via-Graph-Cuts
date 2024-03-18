@@ -96,9 +96,9 @@ def main():
     s_name = os.path.splitext(os.path.basename(style_dir_resized))[0]
 
     if args.output_name is None:
-        output_name = f'/{c_name}_{s_name}'
+        output_name = f'/{c_name}_{s_name}_cluster_{args.n_cluster}'
     else:
-        output_name = f'{args.output_name}/{c_name}_{s_name}'
+        output_name = f'{args.output_name}/{c_name}_{s_name}_cluster_{args.n_cluster}'
 
     save_image(out, f'{output_name}.jpg', nrow=1)
     
