@@ -23,10 +23,13 @@ class PreProcessDataset(Dataset):
 		content_dir_resized = content_dir + '_resized'
 		style_dir_resized = style_dir + '_resized'
 		if not (os.path.exists(content_dir_resized) and os.path.exists(style_dir_resized)):
+			print("|_ resizing")
 			os.mkdir(content_dir_resized)
 			os.mkdir(style_dir_resized)
 			self._resize(content_dir, content_dir_resized)
 			self._resize(style_dir, style_dir_resized)
+		else : 
+			print("|_ no resize needed resize")
 
 		content_images = glob.glob((content_dir_resized + '/*'))
 		np.random.shuffle(content_images)
@@ -37,7 +40,7 @@ class PreProcessDataset(Dataset):
 
 	@staticmethod
 	def _resize(source_dir, target_dir):
-		print(f'Start Resizing {source_dir} ')
+		print(f'|__ Start Resizing {source_dir} ')
 		for i in tqdm(os.listdir(source_dir)):
 			filename = os.path.basename(i)
 			print(filename)
