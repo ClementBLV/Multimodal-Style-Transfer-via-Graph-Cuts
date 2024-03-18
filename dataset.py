@@ -18,6 +18,8 @@ class PreProcessDataset(Dataset):
 	"""docstring for PreProcessDataset"""
 	def __init__(self, content_dir, style_dir, transforms=trans):
 		super().__init__()
+		assert not("." in content_dir) , "Don't extentions in the path"
+		assert not("." in style_dir) , "Don't put extentions in the path"
 		content_dir_resized = content_dir + '_resized'
 		style_dir_resized = style_dir + '_resized'
 		if not (os.path.exists(content_dir_resized) and os.path.exists(style_dir_resized)):
@@ -38,11 +40,14 @@ class PreProcessDataset(Dataset):
 		print(f'Start Resizing {source_dir} ')
 		for i in tqdm(os.listdir(source_dir)):
 			filename = os.path.basename(i)
+			print(filename)
 			try:
 				image = io.imread(os.path.join(source_dir, i))
 				if len(image.shape) == 3 and image.shape[-1] == 3:
 					H, W, _ = image.shape
+
 					if H < W:
+						print('H < W')
 						ratio = W / H
 						H = 512
 						W = int(ratio*H)
@@ -51,8 +56,14 @@ class PreProcessDataset(Dataset):
 						W = 512
 						H = int(ratio*W)
 					image = transform.resize(image, (H, W), mode='reflect', anti_aliasing=True)
-					io.imsave(os.path.join(target_dir, filename), image)
-			except:
+
+					# Convert image data type to uint8 if not it doesn't work
+					image_uint8 = np.clip(image * 255, 0, 255).astype(np.uint8)
+
+					io.imsave(os.path.join(target_dir, filename), image_uint8)
+			except Exception as err:
+				print(Exception, err)
+				print("there were an issue during resize")
 				continue
 
 	def __len__(self):
