@@ -22,7 +22,9 @@ class PreProcessDataset(Dataset):
 		assert not("." in style_dir) , "Don't put extentions in the path"
 		content_dir_resized = content_dir + '_resized'
 		style_dir_resized = style_dir + '_resized'
-		if not (os.path.exists(content_dir_resized) and os.path.exists(style_dir_resized)):
+		if (not (os.path.exists(content_dir_resized) and os.path.exists(style_dir_resized)) 
+	  or len(os.listdir(content_dir_resized))!= len(os.listdir(content_dir))
+		or len(os.listdir(style_dir_resized))!= len(os.listdir(style_dir))  ):
 			print("|_ resizing")
 			os.mkdir(content_dir_resized)
 			os.mkdir(style_dir_resized)
@@ -43,14 +45,12 @@ class PreProcessDataset(Dataset):
 		print(f'|__ Start Resizing {source_dir} ')
 		for i in tqdm(os.listdir(source_dir)):
 			filename = os.path.basename(i)
-			print(filename)
 			try:
 				image = io.imread(os.path.join(source_dir, i))
 				if len(image.shape) == 3 and image.shape[-1] == 3:
 					H, W, _ = image.shape
 
 					if H < W:
-						print('H < W')
 						ratio = W / H
 						H = 512
 						W = int(ratio*H)
