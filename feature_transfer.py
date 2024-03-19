@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from maxflow.fastmin import aexpansion_grid
 from sklearn.cluster import KMeans
+from sklearn import metrics
 
 
 def data_term(content_feature, cluster_centers):
@@ -93,6 +94,30 @@ class MultimodalStyleTransfer:
         s = style_feature.reshape(C, -1).transpose(0, 1)
 
         self.k_means_estimator.fit(s.to('cpu'))
+        # Elbow Method
+        inertia = []
+        silhouette_scores = []
+        for k in range(1, 11):
+            kmeans = KMeans(n_clusters=k, random_state=42)
+            kmeans.fit(s.to('cpu'))
+            inertia.append(kmeans.inertia_)
+            if k > 1: 
+                silhouette_scores.append(metrics.silhouette_score(s.to('cpu'), kmeans.labels_))
+
+        print(inertia, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        # Calculate the rate of change in inertia
+        rate_of_change = [inertia[i] - inertia[i+1] for i in range(len(inertia)-1)]
+        
+        # Find the index where rate of change is maximized
+        elbow_index = rate_of_change.index(max(rate_of_change))
+        
+        # Return the optimal number of clusters
+        print(elbow_index + 1) 
+        print("============================")
+
+        optimal_k_index = silhouette_scores.index(max(silhouette_scores))
+        print(optimal_k_index + 2)  # Add 2 because silhouette score starts from 2 clusters
+
         labels = torch.Tensor(self.k_means_estimator.labels_).to(self.device)
         cluster_centers = torch.Tensor(self.k_means_estimator.cluster_centers_).to(self.device).transpose(0, 1)
 
