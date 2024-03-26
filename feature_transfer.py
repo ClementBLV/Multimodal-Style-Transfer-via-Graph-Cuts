@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from maxflow.fastmin import aexpansion_grid
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, DBSCAN
 from sklearn import metrics
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
@@ -97,7 +97,7 @@ class MultimodalStyleTransfer:
     def style_feature_clustering(self, style_feature):
         C, _, _ = style_feature.shape
         s = style_feature.reshape(C, -1).transpose(0, 1)
-        if self.print_tsne : 
+        if self.print_tsne=="kmeans" : 
             ##############################
             ###     T -SNE display     ###
             ##############################
@@ -106,7 +106,7 @@ class MultimodalStyleTransfer:
             tsne = TSNE(n_components=3, random_state=42)
             s_tsne = tsne.fit_transform(s.to('cpu'))
            
-            #Kmeans 
+            ##Kmeans 
             kmeans = KMeans(n_clusters=self.k, random_state=42)
             labels = kmeans.fit_predict(s_tsne)
 
@@ -139,9 +139,49 @@ class MultimodalStyleTransfer:
             
             # Show the plot
             plt.show()
+        
+        if self.print_tsne=="dbscan" : 
+            ##############################
+            ###    DBSCAN clustering   ###
+            ##############################
+            tsne = TSNE(n_components=3, random_state=42)
+            s_tsne = tsne.fit_transform(s.to('cpu'))
+
+            dbscan = DBSCAN(eps=3, min_samples=15)
+            labels = dbscan.fit_predict(s_tsne)
+            #Number of clusters in labels, ignoring noise if present.
+            nclusters = len(set(labels)) - (1 if -1 in labels else 0)
+            nnoise = list(labels).count(-1)
+            #Plot the DBSCAN clustering in 3D
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            #Black color for noise points
+            unique_labels = set(labels)
+            #Define a list of typical colors
+            typical_colors = ['red', 'green', 'blue', 'orange', 'purple', 'cyan', 'magenta', 'yellow', 'brown', 'pink', 'gray', 'olive']
+            colors = typical_colors[:len(unique_labels)]
+            for k, col in zip(unique_labels, colors):
+                if k == -1:
+                    col = [0, 0, 0, 1]
+                class_member_mask = (labels == k)
+
+                xy = s_tsne[class_member_mask]
+
+                ax.scatter(xy[:, 0], xy[:, 1], xy[:, 2], c=[col],
+                marker='o', label='Cluster %d' % k)
+                ax.set_xlabel('t-SNE Component 1')
+                ax.set_ylabel('t-SNE Component 2')
+                ax.set_zlabel('t-SNE Component 3')
+                ax.set_title('t-SNE of Style Feature (3D). Clustering using DBSCAN.')
+                ax.legend()
+            #Save the plot to a file
+            plt.savefig('dbscan_3d_plot.png')
+            #Show the plot
+            plt.show()
 
         self.k_means_estimator.fit(s.to('cpu'))
-        
+        # you could replace kmeans by dbscan here 
+
         if self.print_cluster_criterium : 
             ######################################
             ###     Cluster number display     ###

@@ -46,7 +46,7 @@ class Model(nn.Module):
                  lam=0.1,
                  pre_train=False,
                  max_cycles=None, 
-                 print_tsne=True, 
+                 print_tsne="kmeans", 
                  print_cluster_criterium=True ):
         super().__init__()
         self.n_cluster = n_cluster
@@ -84,7 +84,7 @@ class Model(nn.Module):
                  device=None,
                  lam=None,
                  max_cycles=None,
-                 print_tsne=True, 
+                 print_tsne="kmeans", 
                  print_cluster_criterium=True ):
 
         n_cluster = self.n_cluster if n_cluster is None else n_cluster

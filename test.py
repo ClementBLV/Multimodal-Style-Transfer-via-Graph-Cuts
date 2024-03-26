@@ -30,7 +30,7 @@ def main():
                         help='GPU ID(negative value indicate CPU)')
     parser.add_argument('--model_state_path', type=str, default='model_state.pth',
                         help='pretrained model state')
-    parser.add_argument('--print_tsne', type=bool, default='False',
+    parser.add_argument('--print_tsne', type=str, default='kmeans',
                         help='If t-sne should be displayed')
     parser.add_argument('--print_cluster_criterium', type=bool, default='False',
                         help='If criterium should be displayed and computed ')
