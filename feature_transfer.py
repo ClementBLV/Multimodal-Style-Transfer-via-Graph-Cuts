@@ -102,25 +102,40 @@ class MultimodalStyleTransfer:
             ###     T -SNE display     ###
             ##############################
 
-            # Adjust these parameters as needed
-            perplexity = 10
-            learning_rate = 200
-            n_iter = 1000
-            random_state = 42  # Set a fixed random seed for reproducibility
-            metric= "cosine" # "manhattan" #
-            tsne = TSNE(n_components=3, perplexity=perplexity, learning_rate=learning_rate, n_iter=n_iter, metric=metric, random_state=random_state)
-            s_tsne = tsne.fit_transform(s)
-            # Plot the PCA-transformed data in 3D
+            # Dimensionality reduction using t-SNE
+            tsne = TSNE(n_components=3, random_state=42)
+            s_tsne = tsne.fit_transform(s.to('cpu'))
+           
+            #Kmeans 
+            kmeans = KMeans(n_clusters=self.k, random_state=42)
+            labels = kmeans.fit_predict(s_tsne)
+
+            # Reorganise clusters
+            clusters = []
+            for i in range(self.k):
+                cluster_points = s[labels == i]
+                clusters.append(cluster_points)
+            
+            # Convertir a tensores y enviar a dispositivo
+            cluster_centers = torch.Tensor(kmeans.cluster_centers_).to(self.device)
+            clusters = [torch.Tensor(cluster).to(self.device) for cluster in clusters]
+
+            # Plot the PCA-transformed data in 3D using Kmeans
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
-            ax.scatter(s_tsne[:, 0], s_tsne[:, 1], s_tsne[:, 2])
+
+            for cluster_label in range(self.k):
+                cluster_points = s_tsne[labels == cluster_label]
+                ax.scatter(cluster_points[:, 0], cluster_points[:, 1], cluster_points[:, 2], label=f'Cluster {cluster_label}')
+    
             ax.set_xlabel('t-SNE Component 1')
             ax.set_ylabel('t-SNE Component 2')
             ax.set_zlabel('t-SNE Component 3')
-            ax.set_title('t-SNE of Style Feature (3D)')
-            
+            ax.set_title('t-SNE of Style Feature (3D). Clustering using Kmeans.')
+            ax.legend()
+
             # Save the plot to a file
-            plt.savefig('pca_3d_plot.png')
+            plt.savefig('pca_kmeans_3d_plot.png')
             
             # Show the plot
             plt.show()
