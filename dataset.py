@@ -19,8 +19,8 @@ class PreProcessDataset(Dataset):
 	"""docstring for PreProcessDataset"""
 	def __init__(self, content_dir, style_dir, transforms=trans):
 		super().__init__()
-		assert not("." in content_dir) , "Don't extentions in the path"
-		assert not("." in style_dir) , "Don't put extentions in the path"
+		# assert not("." in content_dir) , "Don't extentions in the path"
+		# assert not("." in style_dir) , "Don't put extentions in the path"
 		content_dir_resized = content_dir + '_resized'
 		style_dir_resized = style_dir + '_resized'
 		if (not (os.path.exists(content_dir_resized) and os.path.exists(style_dir_resized))) :
