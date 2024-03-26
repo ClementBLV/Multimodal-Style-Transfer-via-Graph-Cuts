@@ -45,13 +45,16 @@ class Model(nn.Module):
                  device='cpu',
                  lam=0.1,
                  pre_train=False,
-                 max_cycles=None):
+                 max_cycles=None, 
+                 print_tsne=True, 
+                 print_cluster_criterium=True ):
         super().__init__()
         self.n_cluster = n_cluster
         self.alpha = alpha
         self.device = device
         self.lam = lam
         self.max_cycles = max_cycles
+
         if pre_train:
             if not os.path.exists('vgg_normalised_conv5_1.pth'):
                 download_file_from_google_drive('1IAOFF5rDkVei035228Qp35hcTnliyMol',
@@ -69,7 +72,9 @@ class Model(nn.Module):
                                                                          alpha,
                                                                          device,
                                                                          lam,
-                                                                         max_cycles)
+                                                                         max_cycles, 
+                                                                         print_tsne, 
+                                                                         print_cluster_criterium )
 
     def generate(self,
                  content_images,
@@ -78,7 +83,9 @@ class Model(nn.Module):
                  alpha=None,
                  device=None,
                  lam=None,
-                 max_cycles=None):
+                 max_cycles=None,
+                 print_tsne=True, 
+                 print_cluster_criterium=True ):
 
         n_cluster = self.n_cluster if n_cluster is None else n_cluster
         alpha = self.alpha if alpha is None else alpha
@@ -90,7 +97,9 @@ class Model(nn.Module):
                                                                     alpha,
                                                                     device,
                                                                     lam,
-                                                                    max_cycles)
+                                                                    max_cycles, 
+                                                                    print_tsne, 
+                                                                    print_cluster_criterium )
 
         content_features = self.vgg_encoder(content_images, output_last_feature=True)
         style_features = self.vgg_encoder(style_images, output_last_feature=True)

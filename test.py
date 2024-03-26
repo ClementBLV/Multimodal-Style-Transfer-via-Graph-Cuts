@@ -30,8 +30,10 @@ def main():
                         help='GPU ID(negative value indicate CPU)')
     parser.add_argument('--model_state_path', type=str, default='model_state.pth',
                         help='pretrained model state')
-
-
+    parser.add_argument('--print_tsne', type=bool, default='False',
+                        help='If t-sne should be displayed')
+    parser.add_argument('--print_cluster_criterium', type=bool, default='False',
+                        help='If criterium should be displayed and computed ')
     args = parser.parse_args()
     #########
     if "." not in  args.content:
@@ -78,7 +80,9 @@ def main():
                   alpha=args.alpha,
                   device=device,
                   lam=args.lam,
-                  max_cycles=args.max_cycles)
+                  max_cycles=args.max_cycles, 
+                  print_tsne=args.print_tsne,
+                  print_cluster_criterium=args.print_cluster_criterium)
     if args.model_state_path is not None:
         model.load_state_dict(torch.load(args.model_state_path, map_location=lambda storage, loc: storage))
         #print(f'{args.model_state_path} loaded')
@@ -90,7 +94,7 @@ def main():
     c_tensor = trans(c).unsqueeze(0).to(device)
     s_tensor = trans(s).unsqueeze(0).to(device)
     with torch.no_grad():
-        out = model.generate(c_tensor, s_tensor).to('cpu')
+        out = model.generate(c_tensor, s_tensor, print_tsne=args.print_tsne, print_cluster_criterium= args.print_cluster_criterium).to('cpu')
 
     c_name = os.path.splitext(os.path.basename(content_dir_resized))[0]
     s_name = os.path.splitext(os.path.basename(style_dir_resized))[0]

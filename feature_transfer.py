@@ -3,7 +3,10 @@ import numpy as np
 from maxflow.fastmin import aexpansion_grid
 from sklearn.cluster import KMeans
 from sklearn import metrics
-
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.manifold import TSNE
 
 def data_term(content_feature, cluster_centers):
     c = content_feature.permute(1, 2, 0)
@@ -75,7 +78,7 @@ def labeled_whiten_and_color(f_c, f_s, alpha, label):
 
 
 class MultimodalStyleTransfer:
-    def __init__(self, n_cluster, alpha, device='cpu', lam=0.1, max_cycles=None):
+    def __init__(self, n_cluster, alpha, device='cpu', lam=0.1, max_cycles=None, print_tsne=True , print_cluster_criterium=True):
         self.k = n_cluster
         self.k_means_estimator = KMeans(n_cluster)
         if (type(alpha) is int or type(alpha) is float) and 0 <= alpha <= 1:
@@ -88,35 +91,69 @@ class MultimodalStyleTransfer:
         self.device = device
         self.lam = lam
         self.max_cycles = max_cycles
+        self.print_tsne = print_tsne
+        self.print_cluster_criterium = print_cluster_criterium 
 
     def style_feature_clustering(self, style_feature):
         C, _, _ = style_feature.shape
         s = style_feature.reshape(C, -1).transpose(0, 1)
+        if self.print_tsne : 
+            ##############################
+            ###     T -SNE display     ###
+            ##############################
+
+            # Adjust these parameters as needed
+            perplexity = 10
+            learning_rate = 200
+            n_iter = 1000
+            random_state = 42  # Set a fixed random seed for reproducibility
+            metric= "cosine" # "manhattan" #
+            tsne = TSNE(n_components=3, perplexity=perplexity, learning_rate=learning_rate, n_iter=n_iter, metric=metric, random_state=random_state)
+            s_tsne = tsne.fit_transform(s)
+            # Plot the PCA-transformed data in 3D
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            ax.scatter(s_tsne[:, 0], s_tsne[:, 1], s_tsne[:, 2])
+            ax.set_xlabel('t-SNE Component 1')
+            ax.set_ylabel('t-SNE Component 2')
+            ax.set_zlabel('t-SNE Component 3')
+            ax.set_title('t-SNE of Style Feature (3D)')
+            
+            # Save the plot to a file
+            plt.savefig('pca_3d_plot.png')
+            
+            # Show the plot
+            plt.show()
 
         self.k_means_estimator.fit(s.to('cpu'))
-        # Elbow Method
-        inertia = []
-        silhouette_scores = []
-        for k in range(1, 11):
-            kmeans = KMeans(n_clusters=k, random_state=42)
-            kmeans.fit(s.to('cpu'))
-            inertia.append(kmeans.inertia_)
-            if k > 1: 
-                silhouette_scores.append(metrics.silhouette_score(s.to('cpu'), kmeans.labels_))
-
-        print(inertia, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        # Calculate the rate of change in inertia
-        rate_of_change = [inertia[i] - inertia[i+1] for i in range(len(inertia)-1)]
         
-        # Find the index where rate of change is maximized
-        elbow_index = rate_of_change.index(max(rate_of_change))
-        
-        # Return the optimal number of clusters
-        print(elbow_index + 1) 
-        print("============================")
+        if self.print_cluster_criterium : 
+            ######################################
+            ###     Cluster number display     ###
+            ######################################
+            # Elbow Method
+            inertia = []
+            silhouette_scores = []
+            for k in range(1, 11):
+                kmeans = KMeans(n_clusters=k, random_state=42)
+                kmeans.fit(s_tsne)
+                inertia.append(kmeans.inertia_)
+                if k > 1: 
+                    silhouette_scores.append(metrics.silhouette_score(s_tsne, kmeans.labels_))
 
-        optimal_k_index = silhouette_scores.index(max(silhouette_scores))
-        print(optimal_k_index + 2)  # Add 2 because silhouette score starts from 2 clusters
+            print("silouhette score" , silhouette_scores)
+            print("cluster number", np.argmax(silhouette_scores) + 2)
+            # Calculate the rate of change in inertia
+            rate_of_change = [inertia[i] - inertia[i+1] for i in range(len(inertia)-1)]
+            
+            # Find the index where rate of change is maximized
+            elbow_index = rate_of_change.index(max(rate_of_change))
+            plt.plot([1, 2, 3, 4, 5, 6, 7, 8, 9 , 10], inertia)
+            plt.show()
+
+            # Return the optimal number of clusters
+            print("elbow method", elbow_index + 1) 
+            print("============================")
 
         labels = torch.Tensor(self.k_means_estimator.labels_).to(self.device)
         cluster_centers = torch.Tensor(self.k_means_estimator.cluster_centers_).to(self.device).transpose(0, 1)
