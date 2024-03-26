@@ -25,7 +25,26 @@ conda create -n MST python=3.9
 conda activate MST
 pip install -r requirements.txt
 ```
+create a folder named output, the generated images will be saved in this folder.  
 
+## Contribution 
+
+From the original fork, we have added 
+- a requirement.txt
+- a bash script to run a large number of experiments
+- the possibility to visually display in 3D space the style features
+- an automatic way to choose the number of clusters (Elbow curve, Silouhette)
+- a new criterium to find the optimal number of clusters using MSE between the output and the style using the style as content (see notebook)
+- a dBscan clustering algorithm instead of kmeans 
+
+## Run the code
+
+```[bash]
+sh script.sh
+```
+In the script the preprocessing of the data is called, it will automatically check within the folder to see if the data needs to be preprocessed to run style transfer, if it needs to do so the modified dataset code will do it. Then the style transfer can be done, the number of clusters varies in a loop but can be fixed to a particular number, there are also two arguments for choosing do display are not the cluster using tsne (`--print_tsne "True" \ --print_cluster_criterium "True" `)
+
+# Previous work before the fork :
 
 ## I have provided a jupyter notebook with instructions to run the training and testing python files using the Google Colab's free GPU. 
 If you wish to run them on your local machine you can follow the instructions below.
